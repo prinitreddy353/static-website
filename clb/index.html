@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Test Score Converter</title>
+    <style>
+        :root {
+            --primary: #4285f4;
+            --secondary: #34a853;
+            --accent: #ea4335;
+            --light: #f8f9fa;
+            --dark: #343a40;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 15px;
+            background-color: #f5f5f5;
+            background-image: url('https://images.unsplash.com/photo-1501504905252-473c47e087f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-blend-mode: overlay;
+            background-color: rgba(245, 245, 245, 0.9);
+        }
+        
+        .calculator-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            background-color: rgba(255, 255, 255, 0.95);
+        }
+        
+        .conversion-results, .comparison-table {
+            background-color: rgba(255, 255, 255, 0.95);
+            overflow-x: auto;
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: clamp(1.5rem, 4vw, 2rem);
+        }
+        
+        .description {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #666;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+        
+        .exam-selector {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            background-color: white;
+            box-sizing: border-box;
+        }
+        
+        .score-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .score-input {
+            margin-bottom: 15px;
+        }
+        
+        .calculate-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 4px;
+            font-size: clamp(1rem, 2vw, 1.1rem);
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        
+        .calculate-btn:hover {
+            background-color: var(--dark);
+        }
+        
+        .result-container {
+            text-align: center;
+            padding: 15px;
+            background-color: rgba(248, 249, 250, 0.9);
+            border-radius: 4px;
+            margin-bottom: 25px;
+        }
+        
+        .result-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+        
+        .result-value {
+            font-size: clamp(1.5rem, 5vw, 2rem);
+            font-weight: bold;
+            color: var(--accent);
+            margin: 10px 0;
+        }
+        
+        .conversion-results {
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+        
+        .conversion-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+        }
+        
+        .conversion-table th {
+            background-color: var(--primary);
+            color: white;
+            padding: 10px;
+            text-align: left;
+        }
+        
+        .conversion-table td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            vertical-align: top;
+        }
+        
+        .conversion-table tr:nth-child(even) {
+            background-color: var(--light);
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+        }
+        
+        .comparison-table th {
+            background-color: var(--primary);
+            color: white;
+            padding: 10px;
+            text-align: left;
+        }
+        
+        .comparison-table td {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            vertical-align: top;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background-color: var(--light);
+        }
+        
+        .section-title {
+            font-size: clamp(1.2rem, 3vw, 1.5rem);
+            color: var(--dark);
+            margin: 25px 0 15px 0;
+            padding-bottom: 5px;
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: clamp(0.8rem, 2vw, 0.9rem);
+        }
+        
+        .signature {
+            font-weight: bold;
+            color: var(--accent);
+            font-style: italic;
+        }
+
+        .error-message {
+            color: var(--accent);
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: bold;
+            display: none;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+        }
+
+        .like-btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: clamp(0.9rem, 2vw, 1rem);
+            cursor: pointer;
+            display: block;
+            margin: 20px auto;
+            transition: all 0.3s;
+        }
+
+        .like-btn:hover {
+            background-color: #d33426;
+            transform: scale(1.05);
+        }
+
+        .like-btn.liked {
+            background-color: var(--secondary);
+        }
+
+        .like-btn i {
+            margin-right: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .calculator-card, .conversion-results {
+                padding: 15px;
+            }
+            
+            .score-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .conversion-table, .comparison-table {
+                font-size: 0.8rem;
+            }
+            
+            .conversion-table th, 
+            .conversion-table td,
+            .comparison-table th,
+            .comparison-table td {
+                padding: 8px;
+            }
+            
+            .result-value {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .conversion-table, .comparison-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            .section-title {
+                font-size: 1.2rem;
+            }
+            
+            .result-container {
+                padding: 10px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="calculator-card">
+        <h1>Language Test Score Converter</h1>
+        <p class="description">Convert between IELTS, PTE Core, and CELPIP scores</p>
+        
+        <div class="exam-selector">
+            <label for="exam-type">Select Exam:</label>
+            <select id="exam-type">
+                <option value="ielts" selected>IELTS</option>
+                <option value="celpip">CELPIP</option>
+                <option value="pte">PTE Core</option>
+            </select>
+        </div>
+        
+        <div class="score-grid">
+            <div>
+                <div class="score-input">
+                    <label for="listening">Listening</label>
+                    <input type="number" id="listening" placeholder="0.0-9.0" min="0" max="9" step="0.5" value="8">
+                </div>
+                <div class="score-input">
+                    <label for="reading">Reading</label>
+                    <input type="number" id="reading" placeholder="0.0-9.0" min="0" max="9" step="0.5" value="7">
+                </div>
+            </div>
+            <div>
+                <div class="score-input">
+                    <label for="writing">Writing</label>
+                    <input type="number" id="writing" placeholder="0.0-9.0" min="0" max="9" step="0.5" value="7">
+                </div>
+                <div class="score-input">
+                    <label for="speaking">Speaking</label>
+                    <input type="number" id="speaking" placeholder="0.0-9.0" min="0" max="9" step="0.5" value="7">
+                </div>
+            </div>
+        </div>
+        
+        <div id="error-message" class="error-message"></div>
+        
+        <button class="calculate-btn" onclick="calculateScore()">Convert Scores</button>
+        
+        <div class="result-container">
+            <div class="result-title">Average Score:</div>
+            <div class="result-value" id="overall-score">7.3</div>
+        </div>
+    </div>
+    
+    <div class="conversion-results" id="conversion-results">
+        <h2 class="section-title">Score Conversions</h2>
+        <table class="conversion-table">
+            <thead>
+                <tr>
+                    <th>IELTS Equivalent</th>
+                    <th>PTE Core Equivalent</th>
+                    <th>CELPIP Equivalent</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Listening: <span id="ielts-listening">8.0</span></td>
+                    <td>Listening: <span id="pte-listening">82-88</span></td>
+                    <td>Listening: <span id="celpip-listening">10</span></td>
+                </tr>
+                <tr>
+                    <td>Reading: <span id="ielts-reading">7.0</span></td>
+                    <td>Reading: <span id="pte-reading">78-87</span></td>
+                    <td>Reading: <span id="celpip-reading">9</span></td>
+                </tr>
+                <tr>
+                    <td>Writing: <span id="ielts-writing">7.0</span></td>
+                    <td>Writing: <span id="pte-writing">88-89</span></td>
+                    <td>Writing: <span id="celpip-writing">9</span></td>
+                </tr>
+                <tr>
+                    <td>Speaking: <span id="ielts-speaking">7.0</span></td>
+                    <td>Speaking: <span id="pte-speaking">84-88</span></td>
+                    <td>Speaking: <span id="celpip-speaking">9</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <h2 class="section-title">Score Comparison by CLB Level</h2>
+    <table class="comparison-table">
+        <thead>
+            <tr>
+                <th>CLB Level</th>
+                <th>IELTS</th>
+                <th>PTE Core</th>
+                <th>CELPIP</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>10</td>
+                <td>Reading: 8.0<br>Writing: 7.5<br>Listening: 8.5<br>Speaking: 7.5</td>
+                <td>Reading: 88-90<br>Writing: 90<br>Listening: 89-90<br>Speaking: 89-90</td>
+                <td>Reading: 10<br>Writing: 10<br>Listening: 10<br>Speaking: 10</td>
+            </tr>
+            <tr>
+                <td>9</td>
+                <td>Reading: 7.0<br>Writing: 7.0<br>Listening: 8.0<br>Speaking: 7.0</td>
+                <td>Reading: 78-87<br>Writing: 88-89<br>Listening: 82-88<br>Speaking: 84-88</td>
+                <td>Reading: 9<br>Writing: 9<br>Listening: 9<br>Speaking: 9</td>
+            </tr>
+            <tr>
+                <td>8</td>
+                <td>Reading: 6.5<br>Writing: 6.5<br>Listening: 7.5<br>Speaking: 6.5</td>
+                <td>Reading: 69-77<br>Writing: 79-87<br>Listening: 71-81<br>Speaking: 76-83</td>
+                <td>Reading: 8<br>Writing: 8<br>Listening: 8<br>Speaking: 8</td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td>Reading: 6.0<br>Writing: 6.0<br>Listening: 6.0<br>Speaking: 6.0</td>
+                <td>Reading: 60-68<br>Writing: 69-78<br>Listening: 60-70<br>Speaking: 68-75</td>
+                <td>Reading: 7<br>Writing: 7<br>Listening: 7<br>Speaking: 7</td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td>Reading: 5.0<br>Writing: 5.5<br>Listening: 5.5<br>Speaking: 5.5</td>
+                <td>Reading: 51-59<br>Writing: 60-68<br>Listening: 50-59<br>Speaking: 59-67</td>
+                <td>Reading: 6<br>Writing: 6<br>Listening: 6<br>Speaking: 6</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>Reading: 4.0<br>Writing: 5.0<br>Listening: 5.0<br>Speaking: 5.0</td>
+                <td>Reading: 42-50<br>Writing: 51-59<br>Listening: 39-49<br>Speaking: 51-58</td>
+                <td>Reading: 5<br>Writing: 5<br>Listening: 5<br>Speaking: 5</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>Reading: 3.5<br>Writing: 4.0<br>Listening: 4.5<br>Speaking: 4.0</td>
+                <td>Reading: 33-41<br>Writing: 41-50<br>Listening: 28-38<br>Speaking: 42-50</td>
+                <td>Reading: 4<br>Writing: 4<br>Listening: 4<br>Speaking: 4</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <button class="like-btn" id="likeBtn" onclick="toggleLike()">
+        <i class="fas fa-thumbs-up"></i> Like this converter
+    </button>
+
+    <div class="footer">
+        <p>Developed by <span class="signature">Prinit Reddy - DevOps Engineer</span></p>
+    </div>
+
+    <script>
+        // Conversion data
+        const conversionData = {
+            ielts: {
+                pte: {
+                    listening: {
+                        '9.0': '90', '8.5': '89-90', '8.0': '82-88', '7.5': '71-81', 
+                        '7.0': '65-70', '6.5': '58-64', '6.0': '50-57', '5.5': '39-49',
+                        '5.0': '28-38', '4.5': '20-27', '4.0': '12-19', '3.5': '5-11'
+                    },
+                    reading: {
+                        '9.0': '90', '8.5': '88-89', '8.0': '78-87', '7.5': '72-77',
+                        '7.0': '65-71', '6.5': '58-64', '6.0': '50-57', '5.5': '43-49',
+                        '5.0': '36-42', '4.5': '29-35', '4.0': '22-28', '3.5': '15-21'
+                    },
+                    writing: {
+                        '9.0': '90', '8.5': '88-89', '8.0': '79-87', '7.5': '72-78',
+                        '7.0': '65-71', '6.5': '58-64', '6.0': '50-57', '5.5': '43-49',
+                        '5.0': '36-42', '4.5': '29-35', '4.0': '22-28', '3.5': '15-21'
+                    },
+                    speaking: {
+                        '9.0': '90', '8.5': '88-89', '8.0': '79-87', '7.5': '72-78',
+                        '7.0': '65-71', '6.5': '58-64', '6.0': '50-57', '5.5': '43-49',
+                        '5.0': '36-42', '4.5': '29-35', '4.0': '22-28', '3.5': '15-21'
+                    }
+                },
+                celpip: {
+                    listening: {
+                        '9.0': '12', '8.5': '11', '8.0': '10', '7.5': '9',
+                        '7.0': '8', '6.5': '7', '6.0': '6', '5.5': '5',
+                        '5.0': '4', '4.5': '3', '4.0': '2', '3.5': '1'
+                    },
+                    reading: {
+                        '9.0': '12', '8.5': '11', '8.0': '10', '7.5': '9',
+                        '7.0': '8', '6.5': '7', '6.0': '6', '5.5': '5',
+                        '5.0': '4', '4.5': '3', '4.0': '2', '3.5': '1'
+                    },
+                    writing: {
+                        '9.0': '12', '8.5': '11', '8.0': '10', '7.5': '9',
+                        '7.0': '8', '6.5': '7', '6.0': '6', '5.5': '5',
+                        '5.0': '4', '4.5': '3', '4.0': '2', '3.5': '1'
+                    },
+                    speaking: {
+                        '9.0': '12', '8.5': '11', '8.0': '10', '7.5': '9',
+                        '7.0': '8', '6.5': '7', '6.0': '6', '5.5': '5',
+                        '5.0': '4', '4.5': '3', '4.0': '2', '3.5': '1'
+                    }
+                }
+            },
+            celpip: {
+                pte: {
+                    listening: {
+                        '12': '90', '11': '89', '10': '88', '9': '82-87',
+                        '8': '76-81', '7': '68-75', '6': '60-67', '5': '52-59',
+                        '4': '44-51', '3': '36-43', '2': '28-35', '1': '20-27'
+                    },
+                    reading: {
+                        '12': '90', '11': '89', '10': '88', '9': '82-87',
+                        '8': '76-81', '7': '68-75', '6': '60-67', '5': '52-59',
+                        '4': '44-51', '3': '36-43', '2': '28-35', '1': '20-27'
+                    },
+                    writing: {
+                        '12': '90', '11': '89', '10': '88', '9': '82-87',
+                        '8': '76-81', '7': '68-75', '6': '60-67', '5': '52-59',
+                        '4': '44-51', '3': '36-43', '2': '28-35', '1': '20-27'
+                    },
+                    speaking: {
+                        '12': '90', '11': '89', '10': '88', '9': '82-87',
+                        '8': '76-81', '7': '68-75', '6': '60-67', '5': '52-59',
+                        '4': '44-51', '3': '36-43', '2': '28-35', '1': '20-27'
+                    }
+                },
+                ielts: {
+                    listening: {
+                        '12': '9.0', '11': '8.5', '10': '8.0', '9': '7.5',
+                        '8': '7.0', '7': '6.5', '6': '6.0', '5': '5.5',
+                        '4': '5.0', '3': '4.5', '2': '4.0', '1': '3.5'
+                    },
+                    reading: {
+                        '12': '9.0', '11': '8.5', '10': '8.0', '9': '7.5',
+                        '8': '7.0', '7': '6.5', '6': '6.0', '5': '5.5',
+                        '4': '5.0', '3': '4.5', '2': '4.0', '1': '3.5'
+                    },
+                    writing: {
+                        '12': '9.0', '11': '8.5', '10': '8.0', '9': '7.5',
+                        '8': '7.0', '7': '6.5', '6': '6.0', '5': '5.5',
+                        '4': '5.0', '3': '4.5', '2': '4.0', '1': '3.5'
+                    },
+                    speaking: {
+                        '12': '9.0', '11': '8.5', '10': '8.0', '9': '7.5',
+                        '8': '7.0', '7': '6.5', '6': '6.0', '5': '5.5',
+                        '4': '5.0', '3': '4.5', '2': '4.0', '1': '3.5'
+                    }
+                }
+            },
+            pte: {
+                celpip: {
+                    listening: {
+                        '90': '12', '89': '11', '88': '10', '82-87': '9',
+                        '76-81': '8', '68-75': '7', '60-67': '6', '52-59': '5',
+                        '44-51': '4', '36-43': '3', '28-35': '2', '20-27': '1'
+                    },
+                    reading: {
+                        '90': '12', '89': '11', '88': '10', '82-87': '9',
+                        '76-81': '8', '68-75': '7', '60-67': '6', '52-59': '5',
+                        '44-51': '4', '36-43': '3', '28-35': '2', '20-27': '1'
+                    },
+                    writing: {
+                        '90': '12', '89': '11', '88': '10', '82-87': '9',
+                        '76-81': '8', '68-75': '7', '60-67': '6', '52-59': '5',
+                        '44-51': '4', '36-43': '3', '28-35': '2', '20-27': '1'
+                    },
+                    speaking: {
+                        '90': '12', '89': '11', '88': '10', '82-87': '9',
+                        '76-81': '8', '68-75': '7', '60-67': '6', '52-59': '5',
+                        '44-51': '4', '36-43': '3', '28-35': '2', '20-27': '1'
+                    }
+                },
+                ielts: {
+                    listening: {
+                        '90': '9.0', '89': '8.5', '88': '8.0', '82-87': '7.5',
+                        '76-81': '7.0', '68-75': '6.5', '60-67': '6.0', '52-59': '5.5',
+                        '44-51': '5.0', '36-43': '4.5', '28-35': '4.0', '20-27': '3.5'
+                    },
+                    reading: {
+                        '90': '9.0', '89': '8.5', '88': '8.0', '82-87': '7.5',
+                        '76-81': '7.0', '68-75': '6.5', '60-67': '6.0', '52-59': '5.5',
+                        '44-51': '5.0', '36-43': '4.5', '28-35': '4.0', '20-27': '3.5'
+                    },
+                    writing: {
+                        '90': '8.0', '88-89': '7.5', '79-87': '7.0', '69-78': '6.5',
+                        '60-68': '6.0', '51-59': '5.5', '41-50': '5.0', '30-40': '4.5',
+                        '20-29': '4.0', '10-19': '3.5'
+                    },
+                    speaking: {
+                        '90': '9.0', '89': '8.5', '88': '8.0', '82-87': '7.5',
+                        '76-81': '7.0', '68-75': '6.5', '60-67': '6.0', '52-59': '5.5',
+                        '44-51': '5.0', '36-43': '4.5', '28-35': '4.0', '20-27': '3.5'
+                    }
+                }
+            }
+        };
+
+        // CLB comparison data
+        const clbComparison = [
+            {'clb': 10, 'ielts': {'reading': '8.0', 'writing': '7.5', 'listening': '8.5', 'speaking': '7.5'}, 'pte': {'reading': '88-90', 'writing': '90', 'listening': '89-90', 'speaking': '89-90'}, 'celpip': {'reading': '10', 'writing': '10', 'listening': '10', 'speaking': '10'}},
+            {'clb': 9, 'ielts': {'reading': '7.0', 'writing': '7.0', 'listening': '8.0', 'speaking': '7.0'}, 'pte': {'reading': '78-87', 'writing': '88-89', 'listening': '82-88', 'speaking': '84-88'}, 'celpip': {'reading': '9', 'writing': '9', 'listening': '9', 'speaking': '9'}},
+            {'clb': 8, 'ielts': {'reading': '6.5', 'writing': '6.5', 'listening': '7.5', 'speaking': '6.5'}, 'pte': {'reading': '69-77', 'writing': '79-87', 'listening': '71-81', 'speaking': '76-83'}, 'celpip': {'reading': '8', 'writing': '8', 'listening': '8', 'speaking': '8'}},
+            {'clb': 7, 'ielts': {'reading': '6.0', 'writing': '6.0', 'listening': '6.0', 'speaking': '6.0'}, 'pte': {'reading': '60-68', 'writing': '69-78', 'listening': '60-70', 'speaking': '68-75'}, 'celpip': {'reading': '7', 'writing': '7', 'listening': '7', 'speaking': '7'}},
+            {'clb': 6, 'ielts': {'reading': '5.0', 'writing': '5.5', 'listening': '5.5', 'speaking': '5.5'}, 'pte': {'reading': '51-59', 'writing': '60-68', 'listening': '50-59', 'speaking': '59-67'}, 'celpip': {'reading': '6', 'writing': '6', 'listening': '6', 'speaking': '6'}},
+            {'clb': 5, 'ielts': {'reading': '4.0', 'writing': '5.0', 'listening': '5.0', 'speaking': '5.0'}, 'pte': {'reading': '42-50', 'writing': '51-59', 'listening': '39-49', 'speaking': '51-58'}, 'celpip': {'reading': '5', 'writing': '5', 'listening': '5', 'speaking': '5'}},
+            {'clb': 4, 'ielts': {'reading': '3.5', 'writing': '4.0', 'listening': '4.5', 'speaking': '4.0'}, 'pte': {'reading': '33-41', 'writing': '41-50', 'listening': '28-38', 'speaking': '42-50'}, 'celpip': {'reading': '4', 'writing': '4', 'listening': '4', 'speaking': '4'}}
+        ];
+
+        // Find the closest score in the conversion data
+        function findClosestScore(score, conversionMap, isRange = false) {
+            if (score === '' || score === null || score === undefined) return '-';
+            
+            // First try exact match
+            if (conversionMap[score] !== undefined) {
+                return conversionMap[score];
+            }
+            
+            // If it's a range, find which range the score falls into
+            if (isRange) {
+                const numericScore = parseFloat(score);
+                if (isNaN(numericScore)) return '-';
+                
+                for (const [range, value] of Object.entries(conversionMap)) {
+                    if (range.includes('-')) {
+                        const [min, max] = range.split('-').map(Number);
+                        if (numericScore >= min && numericScore <= max) {
+                            return value;
+                        }
+                    } else if (Number(range) === numericScore) {
+                        return value;
+                    }
+                }
+                return '-';
+            }
+            
+            // For non-range values, find the closest lower score
+            let closestKey = null;
+            const numericScore = parseFloat(score);
+            if (isNaN(numericScore)) return '-';
+            
+            const numericKeys = Object.keys(conversionMap)
+                .map(key => parseFloat(key))
+                .sort((a, b) => a - b);
+            
+            for (const key of numericKeys) {
+                if (key <= numericScore) {
+                    closestKey = key;
+                } else {
+                    break;
+                }
+            }
+            
+            return closestKey !== null ? conversionMap[closestKey.toString()] : '-';
+        }
+
+        // Update input fields based on selected exam type
+        function updateInputFields() {
+            const examType = document.getElementById('exam-type').value;
+            const inputs = document.querySelectorAll('.score-input input');
+            
+            inputs.forEach(input => {
+                input.value = '';
+                
+                if (examType === 'ielts') {
+                    input.placeholder = '0.0-9.0';
+                    input.step = '0.5';
+                    input.min = '0';
+                    input.max = '9';
+                } else if (examType === 'pte') {
+                    input.placeholder = '10-90';
+                    input.step = '1';
+                    input.min = '10';
+                    input.max = '90';
+                } else { // celpip
+                    input.placeholder = '1-12';
+                    input.step = '1';
+                    input.min = '1';
+                    input.max = '12';
+                }
+            });
+            
+            document.getElementById('overall-score').textContent = '-';
+            document.getElementById('error-message').style.display = 'none';
+            resetConversionResults();
+        }
+
+        function resetConversionResults() {
+            const sections = ['listening', 'reading', 'writing', 'speaking'];
+            sections.forEach(section => {
+                document.getElementById(`ielts-${section}`).textContent = '-';
+                document.getElementById(`pte-${section}`).textContent = '-';
+                document.getElementById(`celpip-${section}`).textContent = '-';
+            });
+        }
+
+        // Validate input scores based on exam type
+        function validateScores(examType, scores) {
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.style.display = 'none';
+            
+            for (const [section, score] of Object.entries(scores)) {
+                const numericScore = parseFloat(score);
+                
+                if (isNaN(numericScore)) {
+                    errorMessage.textContent = `Please enter a valid number for ${section}`;
+                    errorMessage.style.display = 'block';
+                    return false;
+                }
+                
+                if (examType === 'ielts' && (numericScore < 0 || numericScore > 9)) {
+                    errorMessage.textContent = `IELTS ${section} score must be between 0 and 9`;
+                    errorMessage.style.display = 'block';
+                    return false;
+                }
+                
+                if (examType === 'pte' && (numericScore < 10 || numericScore > 90)) {
+                    errorMessage.textContent = `PTE ${section} score must be between 10 and 90`;
+                    errorMessage.style.display = 'block';
+                    return false;
+                }
+                
+                if (examType === 'celpip' && (numericScore < 1 || numericScore > 12)) {
+                    errorMessage.textContent = `CELPIP ${section} score must be between 1 and 12`;
+                    errorMessage.style.display = 'block';
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        // Calculate the overall score and conversions
+        function calculateScore() {
+            const examType = document.getElementById('exam-type').value;
+            const sections = ['listening', 'reading', 'writing', 'speaking'];
+            const scores = {};
+            let allScoresEntered = true;
+            
+            // Get all scores
+            sections.forEach(section => {
+                scores[section] = document.getElementById(section).value;
+                if (!scores[section]) {
+                    allScoresEntered = false;
+                }
+            });
+            
+            if (!allScoresEntered) {
+                document.getElementById('error-message').textContent = 'Please enter all four section scores';
+                document.getElementById('error-message').style.display = 'block';
+                return;
+            }
+            
+            if (!validateScores(examType, scores)) {
+                return;
+            }
+            
+            // Calculate average
+            let total = 0;
+            sections.forEach(section => {
+                total += parseFloat(scores[section]);
+            });
+            const average = total / 4;
+            
+            const overallElement = document.getElementById('overall-score');
+            
+            // Calculate overall score based on exam type
+            let overallScore;
+            if (examType === 'ielts') {
+                overallScore = Math.round(average * 2) / 2;
+                overallElement.textContent = overallScore.toFixed(1);
+            } else {
+                overallScore = Math.round(average);
+                overallElement.textContent = overallScore;
+            }
+            
+            // Calculate and display conversions for each section
+            sections.forEach(section => {
+                const score = scores[section];
+                
+                // Get IELTS equivalent
+                if (examType !== 'ielts') {
+                    const ieltsConversion = conversionData[examType]?.ielts?.[section] || {};
+                    document.getElementById(`ielts-${section}`).textContent = 
+                        findClosestScore(score, ieltsConversion, examType === 'pte');
+                } else {
+                    document.getElementById(`ielts-${section}`).textContent = score;
+                }
+                
+                // Get PTE equivalent
+                if (examType !== 'pte') {
+                    const pteConversion = conversionData[examType]?.pte?.[section] || {};
+                    document.getElementById(`pte-${section}`).textContent = 
+                        findClosestScore(score, pteConversion, examType === 'ielts');
+                } else {
+                    document.getElementById(`pte-${section}`).textContent = score;
+                }
+                
+                // Get CELPIP equivalent
+                if (examType !== 'celpip') {
+                    const celpipConversion = conversionData[examType]?.celpip?.[section] || {};
+                    document.getElementById(`celpip-${section}`).textContent = 
+                        findClosestScore(score, celpipConversion, false);
+                } else {
+                    document.getElementById(`celpip-${section}`).textContent = score;
+                }
+            });
+        }
+
+        // Like button functionality
+        function toggleLike() {
+            const likeBtn = document.getElementById('likeBtn');
+            likeBtn.classList.toggle('liked');
+            
+            if (likeBtn.classList.contains('liked')) {
+                likeBtn.innerHTML = '<i class="fas fa-thumbs-up"></i> Thanks for your feedback!';
+            } else {
+                likeBtn.innerHTML = '<i class="fas fa-thumbs-up"></i> Like this converter';
+            }
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update input fields when exam type changes
+            document.getElementById('exam-type').addEventListener('change', updateInputFields);
+            
+            // Set up initial input fields
+            updateInputFields();
+            
+            // Calculate initial score
+            calculateScore();
+        });
+    </script>
+</body>
+</html>
